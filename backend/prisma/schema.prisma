@@ -1,0 +1,186 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  sales
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+  role     Role   @default(sales)
+}
+
+enum Status {
+  active
+  inactive
+}
+
+model Category {
+  id     Int    @id @default(autoincrement())
+  name   String
+  status Status @default(active)
+
+  parent_id Int?
+  slug      String?    @unique
+  parent    Category?  @relation("CategoryHierarchy", fields: [parent_id], references: [id])
+  children  Category[] @relation("CategoryHierarchy")
+
+  products Product[]
+}
+
+model Brand {
+  id Int @id @default(autoincrement())
+
+  name String
+  slug String? @unique
+
+  logo String?
+
+  status Status @default(active)
+
+  products Product[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Supplier {
+  id Int @id @default(autoincrement())
+
+  name         String
+  company_name String?
+
+  email String? @unique
+  phone String?
+
+  address String?
+  city    String?
+  country String?
+
+  tax_number String?
+
+  status Status @default(active)
+
+  products Product[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+
+  name String
+  slug String? @unique
+
+  sku String @unique
+
+  barcode String? @unique
+  qr_code String? @unique
+
+  image String?
+
+  description String?
+
+  price      Decimal  @db.Decimal(10, 2)
+  cost_price Decimal? @db.Decimal(10, 2)
+
+  quantity Int @default(0)
+
+  alert_quantity Int @default(5)
+
+  unit String? @default("piece")
+
+  expiry_date DateTime?
+
+  status Status @default(active)
+
+  is_featured Boolean @default(false)
+
+  track_stock Boolean @default(true)
+
+  category_id Int
+  category    Category @relation(fields: [category_id], references: [id])
+
+  brand_id Int?
+  brand    Brand? @relation(fields: [brand_id], references: [id])
+
+  supplier_id Int?
+  supplier    Supplier? @relation(fields: [supplier_id], references: [id])
+
+  stock_transactions StockTransaction[]
+  sale_items         SaleItem[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model StockTransaction {
+  id Int @id @default(autoincrement())
+
+  product_id Int
+  product Product @relation(fields: [product_id], references: [id])
+
+  type String
+
+  quantity Decimal @db.Decimal(10, 2)
+
+  previous_stock Decimal @db.Decimal(10, 2)
+
+  new_stock Decimal @db.Decimal(10, 2)
+
+  source String?
+
+  reference_id String?
+
+  note String?
+
+  created_at DateTime @default(now())
+}
+
+model Sale {
+  id Int @id @default(autoincrement())
+
+  invoice_no String @unique
+
+  subtotal   Decimal @db.Decimal(10, 2)
+  tax_amount Decimal @db.Decimal(10, 2)
+
+  discount Decimal @db.Decimal(10, 2)
+
+  total_amount Decimal @db.Decimal(10, 2)
+
+  payment_method String?
+
+  created_at DateTime @default(now())
+
+  items SaleItem[]
+}
+
+model SaleItem {
+  id Int @id @default(autoincrement())
+
+  sale_id Int
+  sale    Sale @relation(fields: [sale_id], references: [id])
+
+  product_id Int
+  product    Product @relation(fields: [product_id], references: [id])
+
+  quantity Int
+
+  unit_price Decimal @db.Decimal(10, 2)
+
+  total_price Decimal @db.Decimal(10, 2)
+}
