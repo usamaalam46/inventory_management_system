@@ -7,13 +7,22 @@ import {
   FaHome,
   FaTags,
   FaTruck,
+  FaSignOutAlt,
 } from "react-icons/fa";
 
-import { NavLink } from "react-router-dom";
+import {
+  NavLink,
+  useNavigate,
+} from "react-router-dom";
+
+import useAuthStore
+  from "../../store/authStore";
 
 const menuSections = [
+
   {
     title: "MAIN",
+
     items: [
       {
         name: "Dashboard",
@@ -25,7 +34,9 @@ const menuSections = [
 
   {
     title: "INVENTORY",
+
     items: [
+
       {
         name: "Categories",
         icon: <FaLayerGroup />,
@@ -54,6 +65,7 @@ const menuSections = [
 
   {
     title: "PURCHASES",
+
     items: [
       {
         name: "Suppliers",
@@ -65,7 +77,9 @@ const menuSections = [
 
   {
     title: "SALES",
+
     items: [
+
       {
         name: "POS",
         icon: <FaCashRegister />,
@@ -83,9 +97,31 @@ const menuSections = [
 
 export default function Sidebar() {
 
+  const navigate =
+    useNavigate();
+
+  const logout =
+    useAuthStore(
+      (state) => state.logout
+    );
+
+  const user =
+    useAuthStore(
+      (state) => state.user
+    );
+
+  // logout
+  const handleLogout = () => {
+
+    logout();
+
+    navigate("/login");
+  };
+
   return (
     <div className="w-64 bg-[#0a0a0a] text-white flex flex-col">
 
+      {/* LOGO */}
       <div className="p-6 border-b border-white/10">
 
         <h1 className="text-2xl font-bold">
@@ -98,6 +134,7 @@ export default function Sidebar() {
 
       </div>
 
+      {/* MENU */}
       <div className="flex-1 overflow-y-auto p-4 space-y-8">
 
         {menuSections.map((section) => (
@@ -117,10 +154,9 @@ export default function Sidebar() {
                   to={item.path}
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-3 rounded-xl transition-all
-                    ${
-                      isActive
-                        ? "bg-white text-black"
-                        : "text-gray-300 hover:bg-white/10"
+                    ${isActive
+                      ? "bg-white text-black"
+                      : "text-gray-300 hover:bg-white/10"
                     }`
                   }
                 >
@@ -145,27 +181,42 @@ export default function Sidebar() {
 
       </div>
 
-      <div className="p-4 border-t border-white/10">
+      {/* USER */}
+      <div className="p-4 border-t border-white/10 space-y-4">
 
         <div className="flex items-center gap-3">
 
-          <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-bold">
-            A
+          <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-bold uppercase">
+
+            {user?.name?.charAt(0) || "A"}
+
           </div>
 
           <div>
 
             <h4 className="font-medium">
-              Admin
+              {user?.name || "Admin"}
             </h4>
 
-            <p className="text-xs text-gray-400">
-              Administrator
+            <p className="text-xs text-gray-400 capitalize">
+              {user?.role || "Administrator"}
             </p>
 
           </div>
 
         </div>
+
+        {/* LOGOUT BUTTON */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 bg-white/10 hover:bg-red-500 transition-all py-3 rounded-xl text-sm font-medium"
+        >
+
+          <FaSignOutAlt />
+
+          Logout
+
+        </button>
 
       </div>
 
