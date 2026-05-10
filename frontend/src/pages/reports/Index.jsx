@@ -11,7 +11,7 @@ import {
 } from "../../services/reportsService";
 
 import Pagination
-  from "../../components/Pagination";
+  from "../../components/pagination";
 
 export default function ReportsPage() {
 
