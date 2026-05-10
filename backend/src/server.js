@@ -8,6 +8,6 @@ const PORT =
 app.listen(PORT, () => {
 
   console.log(
-    `✅ Server running on port ${PORT}`
+    `✅ Server running on port ${PORT} and Database url is ${process.env.DATABASE_URL} 🚀`
   );
 });
